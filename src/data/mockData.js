@@ -32,7 +32,7 @@ const portById = Object.fromEntries(northernSeaRoutePorts.map((port) => [port.id
 const vesselTemplates = [
   {
     id: 'v-001',
-    name: 'Arctic Horizon',
+    name: 'Арктический горизонт',
     imo: 'IMO 9387421',
     status: 'В пути',
     flag: 'Russia',
@@ -65,7 +65,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-002',
-    name: 'Yamal Star',
+    name: 'Звезда Ямала',
     imo: 'IMO 9145208',
     status: 'Погрузка',
     flag: 'Russia',
@@ -97,7 +97,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-003',
-    name: 'Polar Meridian',
+    name: 'Полярный меридиан',
     imo: 'IMO 9274318',
     status: 'Задержано',
     flag: 'Russia',
@@ -127,7 +127,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-004',
-    name: 'Bering Gate',
+    name: 'Беринговы ворота',
     imo: 'IMO 9472901',
     status: 'В пути',
     flag: 'Russia',
@@ -157,7 +157,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-005',
-    name: 'Kara Supply',
+    name: 'Карский снабженец',
     imo: 'IMO 9368114',
     status: 'Разгрузка',
     flag: 'Russia',
@@ -187,7 +187,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-006',
-    name: 'Chukchi Runner',
+    name: 'Чукотский экспресс',
     imo: 'IMO 9495087',
     status: 'В пути',
     flag: 'Russia',
@@ -221,7 +221,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-007',
-    name: 'Yenisei North',
+    name: 'Северный Енисей',
     imo: 'IMO 9512046',
     status: 'В пути',
     flag: 'Russia',
@@ -254,7 +254,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-008',
-    name: 'White Sea Carrier',
+    name: 'Беломорский перевозчик',
     imo: 'IMO 9436729',
     status: 'Погрузка',
     flag: 'Russia',
@@ -288,7 +288,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-009',
-    name: 'Laptev Bridge',
+    name: 'Лаптевский мост',
     imo: 'IMO 9583174',
     status: 'В пути',
     flag: 'Russia',
@@ -322,7 +322,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-010',
-    name: 'Eastern Aurora',
+    name: 'Восточная Аврора',
     imo: 'IMO 9614806',
     status: 'Разгрузка',
     flag: 'Russia',
@@ -351,7 +351,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-011',
-    name: 'Ob Bay Express',
+    name: 'Экспресс Обской губы',
     imo: 'IMO 9657024',
     status: 'В пути',
     flag: 'Russia',
@@ -378,7 +378,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-012',
-    name: 'Kolyma Ice',
+    name: 'Колымский лёд',
     imo: 'IMO 9671148',
     status: 'Ожидает отправки',
     flag: 'Russia',
@@ -405,7 +405,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-013',
-    name: 'Ambarchik Shuttle',
+    name: 'Амбарчикский челнок',
     imo: 'IMO 9713057',
     status: 'В пути',
     flag: 'Russia',
@@ -509,10 +509,10 @@ function buildMockCargos() {
 export const cargos = buildMockCargos();
 
 export const events = [
-  { time: '27.07.2026 13:05', label: 'Ambarchik Shuttle вышел из Амбарчика в направлении Певека', type: 'ok' },
-  { time: '27.07.2026 12:10', label: 'Arctic Horizon прошел контрольную точку Карское море - запад', type: 'ok' },
-  { time: '27.07.2026 10:35', label: 'Kolyma Ice следует западным рейсом Провидения — Мурманск', type: 'warn' },
-  { time: '27.07.2026 09:10', label: 'Yamal Star следует по маршруту Мурманск — Провидения', type: 'ok' },
+  { time: '27.07.2026 13:05', label: 'Амбарчикский челнок вышел из Амбарчика в направлении Певека', type: 'ok' },
+  { time: '27.07.2026 12:10', label: 'Арктический горизонт прошёл контрольную точку Карское море — запад', type: 'ok' },
+  { time: '27.07.2026 10:35', label: 'Колымский лёд следует западным рейсом Провидения — Мурманск', type: 'warn' },
+  { time: '27.07.2026 09:10', label: 'Звезда Ямала следует по маршруту Мурманск — Провидения', type: 'ok' },
   { time: '26.07.2026 21:50', label: 'Груз C-2003 подтвержден к погрузке на рейс Мурманск — Провидения', type: 'info' },
 ];
 
