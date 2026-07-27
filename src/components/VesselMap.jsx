@@ -1,24 +1,37 @@
 import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { northernSeaRoutePorts } from '../data/mockData.js';
 import {
   boundsForVessel,
   createVesselArrowImage,
   mapStyle,
+  northernSeaRoutePortsGeoJson,
   portGeoJson,
+  selectedVesselGeoJson,
   vesselGeoJson,
   vesselRouteGeoJson,
 } from '../utils/mapGeoJson.js';
 
-export function VesselMap({ vessels, selectedVessel, onSelectVessel }) {
+export function VesselMap({ selectedNsrPort, vessels, selectedVessel, onSelectNsrPort, onSelectVessel }) {
   const mapNode = useRef(null);
   const mapRef = useRef(null);
+  const selectedNsrPortRef = useRef(selectedNsrPort);
   const selectedRef = useRef(selectedVessel);
+  const onSelectNsrPortRef = useRef(onSelectNsrPort);
   const onSelectRef = useRef(onSelectVessel);
+
+  useEffect(() => {
+    selectedNsrPortRef.current = selectedNsrPort;
+  }, [selectedNsrPort]);
 
   useEffect(() => {
     selectedRef.current = selectedVessel;
   }, [selectedVessel]);
+
+  useEffect(() => {
+    onSelectNsrPortRef.current = onSelectNsrPort;
+  }, [onSelectNsrPort]);
 
   useEffect(() => {
     onSelectRef.current = onSelectVessel;
@@ -54,7 +67,7 @@ export function VesselMap({ vessels, selectedVessel, onSelectVessel }) {
         source: 'selected-route',
         paint: {
           'line-color': '#ffffff',
-          'line-width': 8,
+          'line-width': 5,
           'line-opacity': 0.72,
         },
       });
@@ -63,8 +76,8 @@ export function VesselMap({ vessels, selectedVessel, onSelectVessel }) {
         type: 'line',
         source: 'selected-route',
         paint: {
-          'line-color': '#f2b84b',
-          'line-width': 5,
+          'line-color': '#38bdf8',
+          'line-width': 2,
           'line-dasharray': [1.2, 1.2],
         },
       });
@@ -78,8 +91,8 @@ export function VesselMap({ vessels, selectedVessel, onSelectVessel }) {
         type: 'circle',
         source: 'route-ports',
         paint: {
-          'circle-radius': ['case', ['==', ['get', 'kind'], 'Транзит'], 6, 8],
-          'circle-color': ['case', ['==', ['get', 'kind'], 'Назначение'], '#167580', '#f2b84b'],
+          'circle-radius': ['case', ['==', ['get', 'kind'], 'Транзит'], 3, 4],
+          'circle-color': ['case', ['==', ['get', 'kind'], 'Назначение'], '#0e7490', '#38bdf8'],
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': 2,
         },
@@ -95,15 +108,51 @@ export function VesselMap({ vessels, selectedVessel, onSelectVessel }) {
           'text-anchor': 'top',
         },
         paint: {
-          'text-color': '#173c43',
+          'text-color': '#2563eb',
           'text-halo-color': '#ffffff',
           'text-halo-width': 1.2,
+        },
+      });
+
+      map.addSource('northern-sea-route-ports', {
+        type: 'geojson',
+        data: northernSeaRoutePortsGeoJson(northernSeaRoutePorts),
+      });
+      map.addLayer({
+        id: 'nsr-ports-circle',
+        type: 'circle',
+        source: 'northern-sea-route-ports',
+        paint: {
+          'circle-radius': ['case', ['==', ['get', 'id'], selectedNsrPortRef.current?.id ?? ''], 6, 3.5],
+          'circle-color': ['case', ['==', ['get', 'id'], selectedNsrPortRef.current?.id ?? ''], '#38bdf8', '#2563eb'],
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': ['case', ['==', ['get', 'id'], selectedNsrPortRef.current?.id ?? ''], 2.5, 1.5],
+        },
+      });
+      map.addLayer({
+        id: 'nsr-ports-label',
+        type: 'symbol',
+        source: 'northern-sea-route-ports',
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-offset': [0, 0.5],
+          'text-size': 11,
+          'text-anchor': 'top',
+        },
+        paint: {
+          'text-color': '#000000',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1.4,
         },
       });
 
       map.addSource('vessels', {
         type: 'geojson',
         data: vesselGeoJson(vessels),
+      });
+      map.addSource('selected-vessel-highlight', {
+        type: 'geojson',
+        data: selectedVesselGeoJson(selectedRef.current),
       });
       map.addLayer({
         id: 'vessels-arrow',
@@ -124,15 +173,47 @@ export function VesselMap({ vessels, selectedVessel, onSelectVessel }) {
         source: 'vessels',
         layout: {
           'text-field': ['get', 'name'],
-          'text-offset': [0, -1.4],
-          'text-size': 12,
+          'text-allow-overlap': false,
+          'text-ignore-placement': false,
+          'text-optional': true,
+          'text-offset': [0, -1],
+          'text-size': 11,
           'text-anchor': 'bottom',
         },
         paint: {
-          'text-color': '#172126',
+          'text-color': '#102033',
           'text-halo-color': '#ffffff',
           'text-halo-width': 1.4,
         },
+      });
+      map.addLayer({
+        id: 'selected-vessel-halo',
+        type: 'circle',
+        source: 'selected-vessel-highlight',
+        paint: {
+          'circle-radius': 12,
+          'circle-color': '#2563eb',
+          'circle-opacity': 0.16,
+          'circle-stroke-color': '#1d4ed8',
+          'circle-stroke-width': 2,
+          'circle-stroke-opacity': 0.72,
+        },
+      });
+      map.addLayer({
+        id: 'selected-vessel-ring',
+        type: 'circle',
+        source: 'selected-vessel-highlight',
+        paint: {
+          'circle-radius': 8,
+          'circle-color': 'rgba(37, 99, 235, 0)',
+          'circle-stroke-color': '#2563eb',
+          'circle-stroke-width': 2.5,
+          'circle-stroke-opacity': 0.96,
+        },
+      });
+
+      ['route-ports-label', 'nsr-ports-label', 'vessels-label'].forEach((layerId) => {
+        if (map.getLayer(layerId)) map.moveLayer(layerId, 'route-ports-circle');
       });
 
       map.on('click', 'vessels-arrow', (event) => {
@@ -141,10 +222,33 @@ export function VesselMap({ vessels, selectedVessel, onSelectVessel }) {
         if (vessel) onSelectRef.current(vessel);
       });
 
+      map.on('click', 'nsr-ports-circle', (event) => {
+        const feature = event.features?.[0];
+        const port = northernSeaRoutePorts.find((item) => item.id === feature?.properties?.id);
+        if (port) onSelectNsrPortRef.current(port);
+      });
+      map.on('click', 'nsr-ports-label', (event) => {
+        const feature = event.features?.[0];
+        const port = northernSeaRoutePorts.find((item) => item.id === feature?.properties?.id);
+        if (port) onSelectNsrPortRef.current(port);
+      });
+
       map.on('mouseenter', 'vessels-arrow', () => {
         map.getCanvas().style.cursor = 'pointer';
       });
       map.on('mouseleave', 'vessels-arrow', () => {
+        map.getCanvas().style.cursor = '';
+      });
+      map.on('mouseenter', 'nsr-ports-circle', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'nsr-ports-circle', () => {
+        map.getCanvas().style.cursor = '';
+      });
+      map.on('mouseenter', 'nsr-ports-label', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'nsr-ports-label', () => {
         map.getCanvas().style.cursor = '';
       });
 
@@ -167,6 +271,7 @@ export function VesselMap({ vessels, selectedVessel, onSelectVessel }) {
 
     map.getSource('selected-route')?.setData(vesselRouteGeoJson(selectedVessel));
     map.getSource('route-ports')?.setData(portGeoJson(selectedVessel));
+    map.getSource('selected-vessel-highlight')?.setData(selectedVesselGeoJson(selectedVessel));
 
     if (map.getLayer('vessels-arrow')) {
       map.setLayoutProperty('vessels-arrow', 'icon-size', [
@@ -183,6 +288,18 @@ export function VesselMap({ vessels, selectedVessel, onSelectVessel }) {
       duration: 700,
     });
   }, [selectedVessel]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded() || !map.getLayer('nsr-ports-circle')) return;
+
+    const selectedId = selectedNsrPort?.id ?? '';
+    const selectedCase = ['==', ['get', 'id'], selectedId];
+
+    map.setPaintProperty('nsr-ports-circle', 'circle-radius', ['case', selectedCase, 6, 3.5]);
+    map.setPaintProperty('nsr-ports-circle', 'circle-color', ['case', selectedCase, '#38bdf8', '#2563eb']);
+    map.setPaintProperty('nsr-ports-circle', 'circle-stroke-width', ['case', selectedCase, 2.5, 1.5]);
+  }, [selectedNsrPort]);
 
   return <div ref={mapNode} className="maplibre-map" />;
 }

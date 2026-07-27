@@ -19,6 +19,23 @@ export const mapStyle = {
   ],
 };
 
+function unwrapLongitudeNear(lng, referenceLng) {
+  let nextLng = lng;
+
+  while (nextLng - referenceLng > 180) nextLng -= 360;
+  while (nextLng - referenceLng < -180) nextLng += 360;
+
+  return nextLng;
+}
+
+function unwrapRouteCoordinates(coordinates) {
+  return coordinates.reduce((route, [lng, lat]) => {
+    const previousLng = route.at(-1)?.[0] ?? lng;
+    route.push([unwrapLongitudeNear(lng, previousLng), lat]);
+    return route;
+  }, []);
+}
+
 export function vesselRouteGeoJson(vessel) {
   return {
     type: 'FeatureCollection',
@@ -28,7 +45,7 @@ export function vesselRouteGeoJson(vessel) {
         properties: { id: vessel.id, name: vessel.route },
         geometry: {
           type: 'LineString',
-          coordinates: vessel.routeCoordinates,
+          coordinates: unwrapRouteCoordinates(vessel.routeCoordinates),
         },
       },
     ],
@@ -36,14 +53,40 @@ export function vesselRouteGeoJson(vessel) {
 }
 
 export function portGeoJson(vessel) {
+  let previousLng = vessel.routeCoordinates[0]?.[0] ?? vessel.routePoints[0]?.coordinates[0] ?? 0;
+
   return {
     type: 'FeatureCollection',
-    features: vessel.routePoints.map((port, index) => ({
+    features: vessel.routePoints.map((port, index) => {
+      const coordinates = [unwrapLongitudeNear(port.coordinates[0], previousLng), port.coordinates[1]];
+      previousLng = coordinates[0];
+
+      return {
+        type: 'Feature',
+        properties: {
+          name: port.name,
+          country: port.country,
+          kind: index === 0 ? 'Отправление' : index === vessel.routePoints.length - 1 ? 'Назначение' : 'Транзит',
+        },
+        geometry: {
+          type: 'Point',
+          coordinates,
+        },
+      };
+    }),
+  };
+}
+
+export function northernSeaRoutePortsGeoJson(ports) {
+  return {
+    type: 'FeatureCollection',
+    features: ports.map((port) => ({
       type: 'Feature',
       properties: {
+        id: port.id,
         name: port.name,
-        country: port.country,
-        kind: index === 0 ? 'Отправление' : index === vessel.routePoints.length - 1 ? 'Назначение' : 'Транзит',
+        lat: port.lat,
+        lon: port.lon,
       },
       geometry: {
         type: 'Point',
@@ -73,10 +116,32 @@ export function vesselGeoJson(vessels) {
   };
 }
 
+export function selectedVesselGeoJson(vessel) {
+  return {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {
+          id: vessel.id,
+          name: vessel.name,
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: vessel.position,
+        },
+      },
+    ],
+  };
+}
+
 export function boundsForVessel(vessel) {
   const bounds = new maplibregl.LngLatBounds();
-  vessel.routeCoordinates.forEach((coordinates) => bounds.extend(coordinates));
-  bounds.extend(vessel.position);
+  const routeCoordinates = unwrapRouteCoordinates(vessel.routeCoordinates);
+  const referenceLng = routeCoordinates.at(Math.floor(routeCoordinates.length / 2))?.[0] ?? vessel.position[0];
+
+  routeCoordinates.forEach((coordinates) => bounds.extend(coordinates));
+  bounds.extend([unwrapLongitudeNear(vessel.position[0], referenceLng), vessel.position[1]]);
   return bounds;
 }
 
@@ -95,7 +160,7 @@ export function createVesselArrowImage() {
   context.lineTo(0, 11);
   context.lineTo(-17, 20);
   context.closePath();
-  context.fillStyle = '#173c43';
+  context.fillStyle = '#0b2545';
   context.strokeStyle = '#ffffff';
   context.lineWidth = 6;
   context.lineJoin = 'round';
@@ -104,7 +169,7 @@ export function createVesselArrowImage() {
 
   context.beginPath();
   context.arc(0, 1, 4, 0, Math.PI * 2);
-  context.fillStyle = '#f2b84b';
+  context.fillStyle = '#38bdf8';
   context.fill();
 
   return {

@@ -1,9 +1,9 @@
 import React from 'react';
-import { CalendarClock, Clock3, Gauge, Navigation } from 'lucide-react';
+import { Boxes, CalendarClock, Clock3, Gauge, Navigation } from 'lucide-react';
 import { statusClass } from '../utils/status.js';
 import { InfoRow } from './InfoRow.jsx';
 
-export function VesselDetails({ vessel, cargos, onSelectCargo }) {
+export function VesselDetails({ vessel, cargos, onOpenCargos }) {
   return (
     <aside className="details-panel">
       <div className="panel-head compact">
@@ -23,15 +23,17 @@ export function VesselDetails({ vessel, cargos, onSelectCargo }) {
         </div>
         <div className="progress"><span style={{ width: `${vessel.progress}%` }} /></div>
       </div>
-      <div className="cargo-on-board">
-        <h3>Грузы на судне</h3>
-        {cargos.map((cargo) => (
-          <button key={cargo.id} onClick={() => onSelectCargo(cargo)}>
-            <span>{cargo.id}</span>
-            <small>{cargo.title}</small>
-          </button>
-        ))}
-      </div>
+
+      <section className="cargo-summary-action">
+        <div>
+          <small>Грузы на судне</small>
+          <strong>{cargos.length}</strong>
+        </div>
+        <button className="primary-button full" type="button" onClick={onOpenCargos}>
+          <Boxes size={18} />
+          Показать грузы
+        </button>
+      </section>
     </aside>
   );
 }
