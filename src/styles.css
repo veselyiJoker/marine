@@ -322,6 +322,178 @@ h3 {
   box-shadow: 0 8px 22px rgba(11, 37, 69, 0.16);
 }
 
+.weather-toolbar {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: calc(100% - 104px);
+  padding: 8px;
+  border: 1px solid rgba(11, 37, 69, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 24px rgba(11, 37, 69, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.weather-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 108px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #d5e1e4;
+  border-radius: 8px;
+  color: #183047;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.weather-toolbar button:hover,
+.weather-toolbar button.active {
+  border-color: #0e7490;
+  color: #075985;
+  background: #e0f2fe;
+}
+
+.weather-toolbar button:focus-visible {
+  outline: 3px solid rgba(14, 116, 144, 0.22);
+  outline-offset: 2px;
+}
+
+.weather-scales {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 2;
+  display: grid;
+  gap: 8px;
+  width: min(260px, calc(100% - 28px));
+}
+
+.weather-scale {
+  display: grid;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid rgba(11, 37, 69, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 24px rgba(11, 37, 69, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.weather-scale-head,
+.weather-scale-values {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.weather-scale-head strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #102033;
+  font-size: 12px;
+}
+
+.weather-scale-symbol {
+  position: relative;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+}
+
+.symbol-wind::before {
+  position: absolute;
+  left: 8px;
+  top: 1px;
+  width: 2px;
+  height: 17px;
+  border-radius: 999px;
+  background: #0b2545;
+  content: "";
+  transform: rotate(25deg);
+  transform-origin: center;
+}
+
+.symbol-wind::after {
+  position: absolute;
+  left: 9px;
+  top: 2px;
+  width: 10px;
+  height: 2px;
+  border-radius: 999px;
+  background: #0b2545;
+  box-shadow: 0 5px 0 #0b2545;
+  content: "";
+  transform: rotate(25deg);
+  transform-origin: left center;
+}
+
+.symbol-ice {
+  border: 1px solid rgba(37, 99, 235, 0.55);
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(135deg, rgba(11, 37, 69, 0.22) 0 2px, transparent 2px 6px),
+    #bae6fd;
+}
+
+.symbol-waves::before {
+  position: absolute;
+  inset: 4px 1px;
+  border-top: 2px solid #0f766e;
+  border-bottom: 2px solid #0f766e;
+  border-radius: 50%;
+  content: "";
+  transform: skewX(-16deg);
+}
+
+.symbol-waves::after {
+  position: absolute;
+  right: 1px;
+  top: 4px;
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 7px solid #0b2545;
+  content: "";
+}
+
+.weather-scale-head small,
+.weather-scale-values {
+  color: #5b7182;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.weather-scale-bar {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(11, 37, 69, 0.1);
+}
+
+.scale-wind {
+  background: linear-gradient(90deg, #d1fae5, #67e8f9, #38bdf8, #0e7490, #0b2545);
+}
+
+.scale-ice {
+  background: linear-gradient(90deg, #eff6ff, #bae6fd, #60a5fa, #2563eb, #1e3a8a);
+}
+
+.scale-waves {
+  background: linear-gradient(90deg, #67e8f9, #2dd4bf, #facc15, #fb923c, #ef4444);
+}
+
 .map-legend {
   position: absolute;
   left: 14px;
@@ -329,7 +501,7 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  max-width: calc(100% - 28px);
+  max-width: min(520px, calc(100% - 304px));
   padding: 8px;
   border: 1px solid rgba(11, 37, 69, 0.12);
   border-radius: 8px;
@@ -1025,6 +1197,28 @@ mark {
 
   .map-frame {
     min-height: 460px;
+  }
+
+  .weather-toolbar {
+    right: 14px;
+    max-width: calc(100% - 28px);
+  }
+
+  .weather-toolbar button {
+    min-width: 0;
+    flex: 1 1 108px;
+  }
+
+  .weather-scales,
+  .map-legend {
+    right: 14px;
+    left: 14px;
+    width: auto;
+    max-width: none;
+  }
+
+  .weather-scales {
+    bottom: 82px;
   }
 
   .modal-backdrop {

@@ -12,14 +12,50 @@ import {
   vesselGeoJson,
   vesselRouteGeoJson,
 } from '../utils/mapGeoJson.js';
+import {
+  createIceHatchImage,
+  createWaveArrowImage,
+  createWindBarbImages,
+  iceWeatherGeoJson,
+  waveWeatherGeoJson,
+  waveDirectionGeoJson,
+  windWeatherGeoJson,
+} from '../utils/weatherLayers.js';
 
-export function VesselMap({ selectedNsrPort, vessels, selectedVessel, onSelectNsrPort, onSelectVessel }) {
+const weatherLayerIds = {
+  wind: ['weather-wind-barb', 'weather-wind-label'],
+  ice: ['weather-ice-fill', 'weather-ice-hatch', 'weather-ice-outline', 'weather-ice-label'],
+  waves: ['weather-waves-fill', 'weather-waves-outline', 'weather-waves-direction', 'weather-waves-label'],
+};
+
+function setWeatherLayerVisibility(map, activeWeatherLayers) {
+  Object.entries(weatherLayerIds).forEach(([layerKey, layerIds]) => {
+    const visibility = activeWeatherLayers?.[layerKey] ? 'visible' : 'none';
+    layerIds.forEach((layerId) => {
+      if (map.getLayer(layerId)) map.setLayoutProperty(layerId, 'visibility', visibility);
+    });
+  });
+}
+
+export function VesselMap({
+  activeWeatherLayers,
+  selectedNsrPort,
+  vessels,
+  selectedVessel,
+  onSelectNsrPort,
+  onSelectVessel,
+}) {
   const mapNode = useRef(null);
   const mapRef = useRef(null);
+  const activeWeatherLayersRef = useRef(activeWeatherLayers);
   const selectedNsrPortRef = useRef(selectedNsrPort);
   const selectedRef = useRef(selectedVessel);
   const onSelectNsrPortRef = useRef(onSelectNsrPort);
   const onSelectRef = useRef(onSelectVessel);
+
+  useEffect(() => {
+    activeWeatherLayersRef.current = activeWeatherLayers;
+  }, [activeWeatherLayers]);
 
   useEffect(() => {
     selectedNsrPortRef.current = selectedNsrPort;
@@ -56,6 +92,209 @@ export function VesselMap({ selectedNsrPort, vessels, selectedVessel, onSelectNs
       if (!map.hasImage('vessel-arrow')) {
         map.addImage('vessel-arrow', createVesselArrowImage());
       }
+      if (!map.hasImage('ice-hatch')) {
+        map.addImage('ice-hatch', createIceHatchImage());
+      }
+      if (!map.hasImage('wave-arrow')) {
+        map.addImage('wave-arrow', createWaveArrowImage());
+      }
+      createWindBarbImages().forEach(({ id, image }) => {
+        if (!map.hasImage(id)) map.addImage(id, image);
+      });
+
+      map.addSource('weather-ice', {
+        type: 'geojson',
+        data: iceWeatherGeoJson(),
+      });
+      map.addLayer({
+        id: 'weather-ice-fill',
+        type: 'fill',
+        source: 'weather-ice',
+        layout: {
+          visibility: activeWeatherLayersRef.current?.ice ? 'visible' : 'none',
+        },
+        paint: {
+          'fill-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'concentration'],
+            0,
+            '#eff6ff',
+            20,
+            '#bae6fd',
+            40,
+            '#60a5fa',
+            60,
+            '#2563eb',
+            80,
+            '#1e3a8a',
+          ],
+          'fill-opacity': 0.42,
+        },
+      });
+      map.addLayer({
+        id: 'weather-ice-hatch',
+        type: 'fill',
+        source: 'weather-ice',
+        layout: {
+          visibility: activeWeatherLayersRef.current?.ice ? 'visible' : 'none',
+        },
+        paint: {
+          'fill-pattern': 'ice-hatch',
+          'fill-opacity': ['interpolate', ['linear'], ['get', 'concentration'], 0, 0.08, 40, 0.22, 80, 0.38],
+        },
+      });
+      map.addLayer({
+        id: 'weather-ice-outline',
+        type: 'line',
+        source: 'weather-ice',
+        layout: {
+          visibility: activeWeatherLayersRef.current?.ice ? 'visible' : 'none',
+        },
+        paint: {
+          'line-color': '#1d4ed8',
+          'line-opacity': 0.55,
+          'line-width': 1.2,
+        },
+      });
+      map.addLayer({
+        id: 'weather-ice-label',
+        type: 'symbol',
+        source: 'weather-ice',
+        layout: {
+          'text-field': ['concat', ['to-string', ['get', 'concentration']], '%'],
+          'text-allow-overlap': false,
+          'text-ignore-placement': false,
+          'text-size': 11,
+          'text-anchor': 'center',
+          visibility: activeWeatherLayersRef.current?.ice ? 'visible' : 'none',
+        },
+        paint: {
+          'text-color': '#0b2545',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1.5,
+        },
+      });
+
+      map.addSource('weather-waves', {
+        type: 'geojson',
+        data: waveWeatherGeoJson(),
+      });
+      map.addSource('weather-wave-direction', {
+        type: 'geojson',
+        data: waveDirectionGeoJson(),
+      });
+      map.addLayer({
+        id: 'weather-waves-fill',
+        type: 'fill',
+        source: 'weather-waves',
+        layout: {
+          visibility: activeWeatherLayersRef.current?.waves ? 'visible' : 'none',
+        },
+        paint: {
+          'fill-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'height'],
+            0,
+            '#67e8f9',
+            1,
+            '#2dd4bf',
+            2,
+            '#facc15',
+            3,
+            '#fb923c',
+            4,
+            '#ef4444',
+          ],
+          'fill-opacity': 0.38,
+        },
+      });
+      map.addLayer({
+        id: 'weather-waves-outline',
+        type: 'line',
+        source: 'weather-waves',
+        layout: {
+          visibility: activeWeatherLayersRef.current?.waves ? 'visible' : 'none',
+        },
+        paint: {
+          'line-color': '#0f766e',
+          'line-dasharray': [1.4, 1],
+          'line-opacity': 0.62,
+          'line-width': 1.4,
+        },
+      });
+      map.addLayer({
+        id: 'weather-waves-direction',
+        type: 'symbol',
+        source: 'weather-wave-direction',
+        layout: {
+          'icon-image': 'wave-arrow',
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true,
+          'icon-rotate': ['get', 'direction'],
+          'icon-rotation-alignment': 'map',
+          'icon-size': ['interpolate', ['linear'], ['get', 'height'], 0, 0.28, 2, 0.42, 4, 0.56],
+          visibility: activeWeatherLayersRef.current?.waves ? 'visible' : 'none',
+        },
+      });
+      map.addLayer({
+        id: 'weather-waves-label',
+        type: 'symbol',
+        source: 'weather-wave-direction',
+        layout: {
+          'text-field': ['concat', ['to-string', ['get', 'height']], ' м'],
+          'text-allow-overlap': false,
+          'text-ignore-placement': false,
+          'text-offset': [0, 1.4],
+          'text-size': 11,
+          'text-anchor': 'top',
+          visibility: activeWeatherLayersRef.current?.waves ? 'visible' : 'none',
+        },
+        paint: {
+          'text-color': '#0b2545',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1.5,
+        },
+      });
+
+      map.addSource('weather-wind', {
+        type: 'geojson',
+        data: windWeatherGeoJson(),
+      });
+      map.addLayer({
+        id: 'weather-wind-barb',
+        type: 'symbol',
+        source: 'weather-wind',
+        layout: {
+          'icon-image': ['get', 'barbIcon'],
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true,
+          'icon-rotate': ['get', 'direction'],
+          'icon-rotation-alignment': 'map',
+          'icon-size': 0.62,
+          visibility: activeWeatherLayersRef.current?.wind ? 'visible' : 'none',
+        },
+      });
+      map.addLayer({
+        id: 'weather-wind-label',
+        type: 'symbol',
+        source: 'weather-wind',
+        layout: {
+          'text-field': ['concat', ['to-string', ['get', 'speed']], ' м/с'],
+          'text-allow-overlap': true,
+          'text-ignore-placement': true,
+          'text-offset': [0, 2.1],
+          'text-size': 11,
+          'text-anchor': 'top',
+          visibility: activeWeatherLayersRef.current?.wind ? 'visible' : 'none',
+        },
+        paint: {
+          'text-color': '#0b2545',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1.4,
+        },
+      });
 
       map.addSource('selected-route', {
         type: 'geojson',
@@ -264,6 +503,13 @@ export function VesselMap({ selectedNsrPort, vessels, selectedVessel, onSelectNs
       mapRef.current = null;
     };
   }, [vessels]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !map.isStyleLoaded()) return;
+
+    setWeatherLayerVisibility(map, activeWeatherLayers);
+  }, [activeWeatherLayers]);
 
   useEffect(() => {
     const map = mapRef.current;
