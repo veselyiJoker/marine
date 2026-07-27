@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Boxes, CheckCircle2, Clock3, Ship } from 'lucide-react';
 import { cargos, events, roles, vessels } from './data/mockData.js';
 import { Header } from './components/Header.jsx';
@@ -25,6 +25,19 @@ export default function App() {
   const [selectedVessel, setSelectedVessel] = useState(vessels[0]);
   const [selectedNsrPort, setSelectedNsrPort] = useState(null);
   const [selectedCargo, setSelectedCargo] = useState(cargos[0]);
+  const hasOpenModal = Boolean(cargoPanel) || isCargoModalOpen || isCargoInfoOpen;
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+
+    if (hasOpenModal) {
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [hasOpenModal]);
 
   const filteredCargos = useMemo(() => {
     const value = query.trim().toLowerCase();
@@ -115,6 +128,14 @@ export default function App() {
     setCargoList((currentCargos) =>
       currentCargos.map((cargo) => (cargo.id === updatedCargo.id ? updatedCargo : cargo))
     );
+    setCargoPanel((currentPanel) =>
+      currentPanel
+        ? {
+            ...currentPanel,
+            cargos: currentPanel.cargos.map((cargo) => (cargo.id === updatedCargo.id ? updatedCargo : cargo)),
+          }
+        : currentPanel
+    );
     setSelectedCargo(updatedCargo);
     closeCargoModal();
   }
@@ -177,6 +198,17 @@ export default function App() {
         </section>
       </section>
 
+      <CargoListModal
+        cargos={cargoPanel?.cargos ?? []}
+        isOpen={Boolean(cargoPanel)}
+        selectedCargo={selectedCargo}
+        subtitle={cargoPanel?.subtitle ?? ''}
+        title={cargoPanel?.title ?? ''}
+        onClose={() => setCargoPanel(null)}
+        onEditCargo={openEditCargoModal}
+        onSelectCargo={openCargoInfo}
+      />
+
       <NewCargoModal
         cargo={editingCargo}
         isOpen={isCargoModalOpen}
@@ -184,14 +216,6 @@ export default function App() {
         vessels={vessels}
         onClose={closeCargoModal}
         onSubmit={cargoModalMode === 'edit' ? handleUpdateCargo : handleCreateCargo}
-      />
-
-      <CargoListModal
-        cargos={cargoPanel?.cargos ?? []}
-        isOpen={Boolean(cargoPanel)}
-        subtitle={cargoPanel?.subtitle ?? ''}
-        title={cargoPanel?.title ?? ''}
-        onClose={() => setCargoPanel(null)}
       />
 
       <CargoInfoModal

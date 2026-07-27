@@ -1,21 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Boxes, CircleUserRound, Clock3, FileText, MapPin, Route, Ship, Tags, X } from 'lucide-react';
-import { cargoTypeLabel, groupCargosByType } from '../utils/cargoTypes.js';
+import React from 'react';
+import { Boxes, Pencil, X } from 'lucide-react';
+import { cargoTypeLabel } from '../utils/cargoTypes.js';
 import { statusClass } from '../utils/status.js';
-import { InfoRow } from './InfoRow.jsx';
 
-export function CargoListModal({ cargos, isOpen, subtitle, title, onClose }) {
-  const [selectedCargo, setSelectedCargo] = useState(null);
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    setSelectedCargo(cargos[0] ?? null);
-  }, [cargos, isOpen]);
-
+export function CargoListModal({ cargos, isOpen, selectedCargo, subtitle, title, onClose, onEditCargo, onSelectCargo }) {
   if (!isOpen) return null;
-
-  const cargoGroups = groupCargosByType(cargos);
 
   return (
     <div className="modal-backdrop">
@@ -39,68 +28,59 @@ export function CargoListModal({ cargos, isOpen, subtitle, title, onClose }) {
         </div>
 
         <div className="cargo-modal-body">
-          <div className="modal-cargo-list">
-            {cargoGroups.length > 0 ? (
-              cargoGroups.map((group) => (
-                <section className="cargo-type-group" key={group.type}>
-                  <div className="cargo-type-head">
-                    <strong>{group.type}</strong>
-                    <span>{group.cargos.length}</span>
-                  </div>
-                  {group.cargos.map((cargo) => (
+          <div className="cargo-table modal-cargo-table">
+            <div className="table-row table-head">
+              <span>Груз</span>
+              <span>Наименование</span>
+              <span>Владелец</span>
+              <span>Тип</span>
+              <span>Судно</span>
+              <span>Маршрут</span>
+              <span>ETA</span>
+              <span>Статус</span>
+              <span>Действия</span>
+            </div>
+
+            {cargos.length > 0 ? (
+              cargos.map((cargo) => (
+                <div
+                  className={`table-row ${selectedCargo?.id === cargo.id ? 'selected-row' : ''}`}
+                  key={cargo.id}
+                  onClick={() => onSelectCargo(cargo)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') onSelectCargo(cargo);
+                  }}
+                >
+                  <span><strong>{cargo.id}</strong><small>{cargo.bl}</small></span>
+                  <span>{cargo.title}</span>
+                  <span>{cargo.owner}</span>
+                  <span><mark className="type-pill">{cargoTypeLabel(cargo.type)}</mark></span>
+                  <span>{cargo.vessel}</span>
+                  <span>{cargo.origin} - {cargo.destination}</span>
+                  <span>{cargo.eta}</span>
+                  <span><mark className={`status ${statusClass(cargo.status)}`}>{cargo.status}</mark></span>
+                  <span>
                     <button
-                      className={selectedCargo?.id === cargo.id ? 'selected-cargo-card' : ''}
-                      key={cargo.id}
+                      className="row-action"
                       type="button"
-                      onClick={() => setSelectedCargo(cargo)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onEditCargo(cargo);
+                      }}
+                      aria-label={`Редактировать груз ${cargo.id}`}
+                      title="Редактировать"
                     >
-                      <span className="cargo-list-card-head">
-                        <strong>{cargo.id}</strong>
-                        <mark className={`status ${statusClass(cargo.status)}`}>{cargo.status}</mark>
-                      </span>
-                      <small>{cargo.title}</small>
-                      <small>{cargo.origin} - {cargo.destination}</small>
+                      <Pencil size={16} />
                     </button>
-                  ))}
-                </section>
+                  </span>
+                </div>
               ))
             ) : (
-              <div className="empty-cargo-state">Грузов для отображения нет.</div>
+              <div className="empty-cargo-state modal-table-empty">Грузов для отображения нет.</div>
             )}
           </div>
-
-          <aside className="cargo-preview" aria-label="Информация о грузе">
-            {selectedCargo ? (
-              <>
-                <div className="panel-head compact">
-                  <div>
-                    <h3>{selectedCargo.id}</h3>
-                    <span>{selectedCargo.bl}</span>
-                  </div>
-                  <span className={`status ${statusClass(selectedCargo.status)}`}>{selectedCargo.status}</span>
-                </div>
-
-                <h4 className="cargo-title">{selectedCargo.title}</h4>
-
-                <div className="detail-list">
-                  <InfoRow icon={<Tags />} label="Тип груза" value={cargoTypeLabel(selectedCargo.type)} />
-                  <InfoRow icon={<CircleUserRound />} label="Владелец" value={selectedCargo.owner} />
-                  <InfoRow icon={<Ship />} label="Судно" value={selectedCargo.vessel} />
-                  <InfoRow icon={<Route />} label="Маршрут" value={`${selectedCargo.origin} - ${selectedCargo.destination}`} />
-                  <InfoRow icon={<MapPin />} label="Порт отправления" value={selectedCargo.origin} />
-                  <InfoRow icon={<Boxes />} label="Вес" value={selectedCargo.weight} />
-                  <InfoRow icon={<Clock3 />} label="ETA" value={selectedCargo.eta} />
-                </div>
-
-                <button className="primary-button full" type="button">
-                  <FileText size={18} />
-                  Открыть документы
-                </button>
-              </>
-            ) : (
-              <div className="empty-cargo-state">Выберите груз из списка, чтобы увидеть детали.</div>
-            )}
-          </aside>
         </div>
       </section>
     </div>
