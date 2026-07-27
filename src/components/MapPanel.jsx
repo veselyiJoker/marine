@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Layers3, Snowflake, Waves, Wind } from 'lucide-react';
+import { Globe2, Snowflake, Waves, Wind } from 'lucide-react';
 import { VesselMap } from './VesselMap.jsx';
 import { weatherLayerConfig } from '../utils/weatherLayers.js';
 
@@ -11,7 +11,7 @@ const weatherLayerControls = [
 
 export function MapPanel({ selectedNsrPort, vessels, selectedVessel, onSelectNsrPort, onSelectVessel }) {
   const [activeWeatherLayers, setActiveWeatherLayers] = useState({
-    wind: true,
+    wind: false,
     ice: false,
     waves: false,
   });
@@ -32,10 +32,10 @@ export function MapPanel({ selectedNsrPort, vessels, selectedVessel, onSelectNsr
     <div className="map-panel">
       <div className="panel-head">
         <div>
-          <h2>Карта MapLibre</h2>
-          <span>Моковый маршрут: {selectedVessel.route}</span>
+          <h2>Северный морской путь</h2>
+          <span>{vessels.length} судов · единый рейс {selectedVessel.route}</span>
         </div>
-        <button className="ghost-button"><Layers3 size={17} />Слои погоды</button>
+        <span className="projection-badge"><Globe2 size={17} />Глобус</span>
       </div>
 
       <div className="map-frame">
@@ -90,7 +90,8 @@ export function MapPanel({ selectedNsrPort, vessels, selectedVessel, onSelectNsr
           </div>
         )}
         <div className="map-legend">
-          <span><i className="legend-route" />Маршрут</span>
+          <span><i className="legend-nsr-route" />Трасса СМП</span>
+          <span><i className="legend-route" />Единый рейс судов</span>
           <span><i className="legend-vessel" />Судно</span>
           <span><i className="legend-port" />Порт маршрута</span>
           <span><i className="legend-nsr-port" />Порт СМП</span>

@@ -148,7 +148,7 @@ export default function App() {
         <Header onCreateCargo={openCreateCargoModal} />
 
         <section className="metrics-grid">
-          <MetricCard icon={<Ship />} label="Активные суда" value="24" hint="+3 за сутки" />
+          <MetricCard icon={<Ship />} label="Активные суда" value={vessels.length} hint="все на едином маршруте СМП" />
           <MetricCard icon={<Boxes />} label="Грузы в пути" value={cargoList.length} hint="моковые записи" />
           <MetricCard icon={<Clock3 />} label="Средний ETA" value="12.4 дн." hint="-8% к прошлой неделе" />
           <MetricCard icon={<CheckCircle2 />} label="Без задержек" value="91%" hint="по текущим рейсам" />

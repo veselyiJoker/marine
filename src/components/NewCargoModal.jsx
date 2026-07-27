@@ -140,8 +140,8 @@ export function NewCargoModal({ cargo, isOpen, mode = 'create', vessels, onClose
             Порт отправления
             <input
               required
+              readOnly
               value={form.origin}
-              onChange={(event) => updateField('origin', event.target.value)}
             />
           </label>
 
@@ -149,8 +149,8 @@ export function NewCargoModal({ cargo, isOpen, mode = 'create', vessels, onClose
             Порт назначения
             <input
               required
+              readOnly
               value={form.destination}
-              onChange={(event) => updateField('destination', event.target.value)}
             />
           </label>
 

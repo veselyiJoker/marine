@@ -532,6 +532,28 @@ h3 {
   background: #38bdf8;
 }
 
+.legend-nsr-route {
+  width: 22px !important;
+  height: 4px !important;
+  border-radius: 999px !important;
+  background: #f97316;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+.projection-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid #d5e1e4;
+  border-radius: 8px;
+  color: #075985;
+  background: #e0f2fe;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .legend-vessel {
   width: 0 !important;
   height: 0 !important;
@@ -993,6 +1015,12 @@ h3 {
 .cargo-form select:focus {
   border-color: #0e7490;
   box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.14);
+}
+
+.cargo-form input[readonly] {
+  color: #3b4c52;
+  background: #eef5f7;
+  cursor: not-allowed;
 }
 
 .modal-actions {

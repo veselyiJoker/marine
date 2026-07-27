@@ -3,9 +3,11 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { northernSeaRoutePorts } from '../data/mockData.js';
 import {
+  boundsForNorthernSeaRoute,
   boundsForVessel,
   createVesselArrowImage,
   mapStyle,
+  northernSeaRouteGeoJson,
   northernSeaRoutePortsGeoJson,
   portGeoJson,
   selectedVesselGeoJson,
@@ -81,6 +83,7 @@ export function VesselMap({
       style: mapStyle,
       center: [66, 30],
       zoom: 2,
+      renderWorldCopies: false,
       attributionControl: false,
     });
 
@@ -300,6 +303,30 @@ export function VesselMap({
         type: 'geojson',
         data: vesselRouteGeoJson(selectedRef.current),
       });
+      map.addSource('northern-sea-route', {
+        type: 'geojson',
+        data: northernSeaRouteGeoJson(),
+      });
+      map.addLayer({
+        id: 'northern-sea-route-halo',
+        type: 'line',
+        source: 'northern-sea-route',
+        paint: {
+          'line-color': '#ffffff',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 1, 2.5, 5, 3.5],
+          'line-opacity': 0.9,
+        },
+      });
+      map.addLayer({
+        id: 'northern-sea-route-line',
+        type: 'line',
+        source: 'northern-sea-route',
+        paint: {
+          'line-color': '#f97316',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 1, 0.9, 5, 1.4],
+          'line-opacity': 0.98,
+        },
+      });
       map.addLayer({
         id: 'selected-route-glow',
         type: 'line',
@@ -491,9 +518,9 @@ export function VesselMap({
         map.getCanvas().style.cursor = '';
       });
 
-      map.fitBounds(boundsForVessel(selectedRef.current), {
-        padding: 64,
-        maxZoom: 4,
+      map.fitBounds(boundsForNorthernSeaRoute(), {
+        padding: 54,
+        maxZoom: 3.2,
         duration: 0,
       });
     });

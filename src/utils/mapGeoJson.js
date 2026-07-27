@@ -1,7 +1,11 @@
 import maplibregl from 'maplibre-gl';
+import { NSR_ROUTE_COORDINATES } from '../data/nsrRoute.js';
 
 export const mapStyle = {
   version: 8,
+  projection: {
+    type: 'globe',
+  },
   sources: {
     osm: {
       type: 'raster',
@@ -34,6 +38,28 @@ function unwrapRouteCoordinates(coordinates) {
     route.push([unwrapLongitudeNear(lng, previousLng), lat]);
     return route;
   }, []);
+}
+
+export function northernSeaRouteGeoJson() {
+  return {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: { name: 'Северный морской путь' },
+        geometry: {
+          type: 'LineString',
+          coordinates: unwrapRouteCoordinates(NSR_ROUTE_COORDINATES),
+        },
+      },
+    ],
+  };
+}
+
+export function boundsForNorthernSeaRoute() {
+  const bounds = new maplibregl.LngLatBounds();
+  unwrapRouteCoordinates(NSR_ROUTE_COORDINATES).forEach((coordinates) => bounds.extend(coordinates));
+  return bounds;
 }
 
 export function vesselRouteGeoJson(vessel) {

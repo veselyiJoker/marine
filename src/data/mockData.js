@@ -1,3 +1,13 @@
+import {
+  AMBARCHIK_PEVEK_ROUTE_COORDINATES,
+  NSR_DESTINATION_PORT_ID,
+  NSR_EASTBOUND_ROUTE_NAME,
+  NSR_ORIGIN_PORT_ID,
+  NSR_ROUTE_COORDINATES,
+  NSR_WESTBOUND_ROUTE_NAME,
+  positionAlongRoute,
+} from './nsrRoute.js';
+
 export const northernSeaRoutePorts = [
   { id: 'nsr-murmansk', name: 'Мурманск', lat: 68.9841, lon: 33.0610, coordinates: [33.0610, 68.9841], status: 'Работает', weather: 'Облачно, +6°C', iceClass: 'Без ледовых ограничений', cargoTurnover: '3.8 млн т / мес.', vesselsInPort: 14, waitingVessels: 2, nextArrival: '28.07.2026 08:40', mainCargo: 'Контейнеры, нефтепродукты, снабжение' },
   { id: 'nsr-arkhangelsk', name: 'Архангельск', lat: 64.5378, lon: 40.5341, coordinates: [40.5341, 64.5378], status: 'Работает', weather: 'Дождь, +9°C', iceClass: 'Лед отсутствует', cargoTurnover: '1.2 млн т / мес.', vesselsInPort: 9, waitingVessels: 1, nextArrival: '28.07.2026 14:10', mainCargo: 'Лес, контейнеры, генгруз' },
@@ -19,7 +29,7 @@ export const northernSeaRoutePorts = [
 
 const portById = Object.fromEntries(northernSeaRoutePorts.map((port) => [port.id, port]));
 
-export const vessels = [
+const vesselTemplates = [
   {
     id: 'v-001',
     name: 'Arctic Horizon',
@@ -393,7 +403,56 @@ export const vessels = [
     ],
     cargos: ['C-2078', 'C-2079', 'C-2080', 'C-2081', 'C-2082', 'C-2083', 'C-2084'],
   },
+  {
+    id: 'v-013',
+    name: 'Ambarchik Shuttle',
+    imo: 'IMO 9713057',
+    status: 'В пути',
+    flag: 'Russia',
+    route: 'Амбарчик → Певек',
+    etd: '27.07.2026 07:40',
+    eta: '29.07.2026 18:20',
+    progress: 46,
+    speed: 10.8,
+    position: [166.5, 70.3],
+    bearing: 88,
+    routePoints: [portById['nsr-ambarchik'], portById['nsr-pevek']],
+    routeCoordinates: AMBARCHIK_PEVEK_ROUTE_COORDINATES,
+    cargos: ['C-2085', 'C-2086', 'C-2087', 'C-2088', 'C-2089', 'C-2090', 'C-2091'],
+  },
 ];
+
+const eastboundRoutePoints = [portById[NSR_ORIGIN_PORT_ID], portById[NSR_DESTINATION_PORT_ID]];
+const westboundRoutePoints = [...eastboundRoutePoints].reverse();
+const eastboundCoordinates = NSR_ROUTE_COORDINATES;
+const westboundCoordinates = [...NSR_ROUTE_COORDINATES].reverse();
+const vesselProgresses = [8, 24, 40, 56, 72, 88, 8, 24, 40, 56, 72, 88];
+
+export const vessels = vesselTemplates.map((vessel, vesselIndex) => {
+  const isRegionalVessel = vessel.id === 'v-013';
+  if (isRegionalVessel) {
+    const { coordinates, bearing } = positionAlongRoute(vessel.routeCoordinates, vessel.progress / 100);
+    return { ...vessel, position: coordinates, bearing };
+  }
+
+  const isEastbound = vesselIndex < 6;
+  const routeCoordinates = isEastbound ? eastboundCoordinates : westboundCoordinates;
+  const routePoints = isEastbound ? eastboundRoutePoints : westboundRoutePoints;
+  const progress = vesselProgresses[vesselIndex];
+  const { coordinates, bearing } = positionAlongRoute(routeCoordinates, progress / 100);
+
+  return {
+    ...vessel,
+    status: 'В пути',
+    speed: vessel.speed > 0 ? vessel.speed : 10.5,
+    route: isEastbound ? NSR_EASTBOUND_ROUTE_NAME : NSR_WESTBOUND_ROUTE_NAME,
+    progress,
+    position: coordinates,
+    bearing,
+    routePoints,
+    routeCoordinates,
+  };
+});
 
 const cargoTypeTemplates = [
   { type: 'Генеральный груз', titles: ['Контейнеры снабжения', 'Проектное оборудование', 'Портовая техника', 'Рефрижераторные контейнеры'], baseWeight: 42 },
@@ -414,61 +473,18 @@ const cargoOwners = [
 ];
 
 const cargoStatuses = ['Ожидает отправки', 'Погружен', 'В пути', 'Задержан', 'Прибыл'];
-const cargoPortTargets = {
-  'nsr-murmansk': 20,
-  'nsr-arkhangelsk': 18,
-  'nsr-naryan-mar': 15,
-  'nsr-varandey': 13,
-  'nsr-amderma': 11,
-  'nsr-sabetta': 10,
-  'nsr-dikson': 9,
-  'nsr-dudinka': 8,
-  'nsr-igarka': 8,
-  'nsr-khatanga': 8,
-  'nsr-tiksi': 8,
-  'nsr-ambarchik': 8,
-  'nsr-pevek': 8,
-  'nsr-provideniya': 8,
-  'nsr-anadyr': 8,
-  'nsr-egvekinot': 8,
-};
 
 function cargoIdsForVessel(vesselIndex) {
   return Array.from({ length: 7 }, (_, cargoIndex) => `C-${2001 + vesselIndex * 7 + cargoIndex}`);
 }
 
-function buildCargoPortPairs(count) {
-  const remainingPorts = Object.entries(cargoPortTargets).map(([id, remaining], index) => ({
-    id,
-    index,
-    remaining,
-  }));
-
-  return Array.from({ length: count }, () => {
-    const [origin, destination] = remainingPorts
-      .filter((port) => port.remaining > 0)
-      .sort((left, right) => right.remaining - left.remaining || left.index - right.index);
-
-    if (!origin || !destination) return null;
-
-    origin.remaining -= 1;
-    destination.remaining -= 1;
-
-    return [origin.id, destination.id];
-  }).filter(Boolean);
-}
-
 function buildMockCargos() {
-  const cargoCount = vessels.length * 7;
-  const portPairs = buildCargoPortPairs(cargoCount);
-
   return vessels.flatMap((vessel, vesselIndex) =>
     cargoIdsForVessel(vesselIndex).map((id, cargoIndex) => {
       const globalIndex = vesselIndex * 7 + cargoIndex;
       const template = cargoTypeTemplates[globalIndex % cargoTypeTemplates.length];
-      const [originId, destinationId] = portPairs[globalIndex];
-      const origin = portById[originId];
-      const destination = portById[destinationId];
+      const origin = vessel.routePoints[0];
+      const destination = vessel.routePoints.at(-1);
       const etaDay = String(2 + (globalIndex % 7)).padStart(2, '0');
       const etaHour = String((8 + globalIndex * 3) % 24).padStart(2, '0');
       const etaMinute = String((15 + globalIndex * 7) % 60).padStart(2, '0');
@@ -493,10 +509,11 @@ function buildMockCargos() {
 export const cargos = buildMockCargos();
 
 export const events = [
+  { time: '27.07.2026 13:05', label: 'Ambarchik Shuttle вышел из Амбарчика в направлении Певека', type: 'ok' },
   { time: '27.07.2026 12:10', label: 'Arctic Horizon прошел контрольную точку Карское море - запад', type: 'ok' },
-  { time: '27.07.2026 10:35', label: 'Polar Meridian снизил скорость из-за ледовой обстановки у подходов к Диксону', type: 'warn' },
-  { time: '27.07.2026 09:10', label: 'Yamal Star начал погрузку в порту Архангельск', type: 'ok' },
-  { time: '26.07.2026 21:50', label: 'Груз C-1303 подтвержден к погрузке на рейс Архангельск - Сабетта', type: 'info' },
+  { time: '27.07.2026 10:35', label: 'Kolyma Ice следует западным рейсом Провидения — Мурманск', type: 'warn' },
+  { time: '27.07.2026 09:10', label: 'Yamal Star следует по маршруту Мурманск — Провидения', type: 'ok' },
+  { time: '26.07.2026 21:50', label: 'Груз C-2003 подтвержден к погрузке на рейс Мурманск — Провидения', type: 'info' },
 ];
 
 export const roles = [
