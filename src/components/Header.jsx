@@ -1,7 +1,7 @@
 import React from 'react';
-import { Bell, Container } from 'lucide-react';
+import { Bell, Container, Route } from 'lucide-react';
 
-export function Header({ onCreateCargo }) {
+export function Header({ onCreateCargo, onCreateVoyage }) {
   return (
     <header className="topbar">
       <div>
@@ -10,6 +10,10 @@ export function Header({ onCreateCargo }) {
       </div>
       <div className="top-actions">
         <button className="icon-button" aria-label="Уведомления"><Bell size={20} /></button>
+        <button className="ghost-button top-action-button" onClick={onCreateVoyage}>
+          <Route size={18} />
+          Создать рейс
+        </button>
         <button className="primary-button" onClick={onCreateCargo}>
           <Container size={18} />
           Новый груз

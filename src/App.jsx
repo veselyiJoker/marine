@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Boxes, CheckCircle2, Clock3, Ship } from 'lucide-react';
-import { cargos, events, roles, vessels } from './data/mockData.js';
+import { cargos, events, northernSeaRoutePorts, roles, vessels } from './data/mockData.js';
+import { voyages } from './data/voyages.js';
 import { Header } from './components/Header.jsx';
 import { Sidebar } from './components/Sidebar.jsx';
 import { MetricCard } from './components/MetricCard.jsx';
@@ -13,19 +14,26 @@ import { CargoListModal } from './components/CargoListModal.jsx';
 import { EventsPanel } from './components/EventsPanel.jsx';
 import { RolesPanel } from './components/RolesPanel.jsx';
 import { NewCargoModal } from './components/NewCargoModal.jsx';
+import { NewVoyageModal } from './components/NewVoyageModal.jsx';
+import { VoyageInfoModal } from './components/VoyageInfoModal.jsx';
+import { VoyageList } from './components/VoyageList.jsx';
 
 export default function App() {
   const [query, setQuery] = useState('');
   const [cargoList, setCargoList] = useState(cargos);
+  const [voyageList, setVoyageList] = useState(voyages);
   const [cargoModalMode, setCargoModalMode] = useState('create');
   const [cargoPanel, setCargoPanel] = useState(null);
   const [editingCargo, setEditingCargo] = useState(null);
   const [isCargoModalOpen, setIsCargoModalOpen] = useState(false);
   const [isCargoInfoOpen, setIsCargoInfoOpen] = useState(false);
+  const [isVoyageModalOpen, setIsVoyageModalOpen] = useState(false);
+  const [isVoyageInfoOpen, setIsVoyageInfoOpen] = useState(false);
   const [selectedVessel, setSelectedVessel] = useState(vessels[0]);
   const [selectedNsrPort, setSelectedNsrPort] = useState(null);
   const [selectedCargo, setSelectedCargo] = useState(cargos[0]);
-  const hasOpenModal = Boolean(cargoPanel) || isCargoModalOpen || isCargoInfoOpen;
+  const [selectedVoyage, setSelectedVoyage] = useState(voyages[0]);
+  const hasOpenModal = Boolean(cargoPanel) || isCargoModalOpen || isCargoInfoOpen || isVoyageModalOpen || isVoyageInfoOpen;
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -140,12 +148,29 @@ export default function App() {
     closeCargoModal();
   }
 
+  function handleCreateVoyage(voyageForm) {
+    const newVoyage = {
+      ...voyageForm,
+      id: `R-${Date.now().toString().slice(-4)}`,
+    };
+
+    setVoyageList((currentVoyages) => [newVoyage, ...currentVoyages]);
+    setSelectedVoyage(newVoyage);
+    setIsVoyageModalOpen(false);
+    setIsVoyageInfoOpen(true);
+  }
+
+  function openVoyageInfo(voyage) {
+    setSelectedVoyage(voyage);
+    setIsVoyageInfoOpen(true);
+  }
+
   return (
     <main className="app-shell">
       <Sidebar />
 
       <section className="workspace">
-        <Header onCreateCargo={openCreateCargoModal} />
+        <Header onCreateCargo={openCreateCargoModal} onCreateVoyage={() => setIsVoyageModalOpen(true)} />
 
         <section className="metrics-grid">
           <MetricCard icon={<Ship />} label="Активные суда" value={vessels.length} hint="все на едином маршруте СМП" />
@@ -180,6 +205,14 @@ export default function App() {
             />
           )}
         </section>
+
+        <VoyageList
+          voyages={voyageList}
+          vessels={vessels}
+          cargos={cargoList}
+          ports={northernSeaRoutePorts}
+          onSelectVoyage={openVoyageInfo}
+        />
 
         <section className="lower-grid">
           <CargoTable
@@ -222,6 +255,25 @@ export default function App() {
         cargo={selectedCargo}
         isOpen={isCargoInfoOpen}
         onClose={() => setIsCargoInfoOpen(false)}
+      />
+
+      <NewVoyageModal
+        isOpen={isVoyageModalOpen}
+        vessels={vessels}
+        cargos={cargoList}
+        ports={northernSeaRoutePorts}
+        voyages={voyageList}
+        onClose={() => setIsVoyageModalOpen(false)}
+        onSubmit={handleCreateVoyage}
+      />
+
+      <VoyageInfoModal
+        voyage={selectedVoyage}
+        isOpen={isVoyageInfoOpen}
+        vessels={vessels}
+        cargos={cargoList}
+        ports={northernSeaRoutePorts}
+        onClose={() => setIsVoyageInfoOpen(false)}
       />
     </main>
   );

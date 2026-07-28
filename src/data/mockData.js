@@ -1,10 +1,7 @@
 import {
   AMBARCHIK_PEVEK_ROUTE_COORDINATES,
-  NSR_DESTINATION_PORT_ID,
-  NSR_EASTBOUND_ROUTE_NAME,
-  NSR_ORIGIN_PORT_ID,
-  NSR_ROUTE_COORDINATES,
-  NSR_WESTBOUND_ROUTE_NAME,
+  NSR_ROUTE,
+  nsrRouteForPorts,
   positionAlongRoute,
 } from './nsrRoute.js';
 
@@ -422,10 +419,10 @@ const vesselTemplates = [
   },
 ];
 
-const eastboundRoutePoints = [portById[NSR_ORIGIN_PORT_ID], portById[NSR_DESTINATION_PORT_ID]];
+const eastboundRoutePoints = [portById[NSR_ROUTE.originPortId], portById[NSR_ROUTE.destinationPortId]];
 const westboundRoutePoints = [...eastboundRoutePoints].reverse();
-const eastboundCoordinates = NSR_ROUTE_COORDINATES;
-const westboundCoordinates = [...NSR_ROUTE_COORDINATES].reverse();
+const eastboundRoute = nsrRouteForPorts(NSR_ROUTE.originPortId, NSR_ROUTE.destinationPortId);
+const westboundRoute = nsrRouteForPorts(NSR_ROUTE.destinationPortId, NSR_ROUTE.originPortId);
 const vesselProgresses = [8, 24, 40, 56, 72, 88, 8, 24, 40, 56, 72, 88];
 
 export const vessels = vesselTemplates.map((vessel, vesselIndex) => {
@@ -436,7 +433,8 @@ export const vessels = vesselTemplates.map((vessel, vesselIndex) => {
   }
 
   const isEastbound = vesselIndex < 6;
-  const routeCoordinates = isEastbound ? eastboundCoordinates : westboundCoordinates;
+  const nsrRoute = isEastbound ? eastboundRoute : westboundRoute;
+  const routeCoordinates = nsrRoute.coordinates;
   const routePoints = isEastbound ? eastboundRoutePoints : westboundRoutePoints;
   const progress = vesselProgresses[vesselIndex];
   const { coordinates, bearing } = positionAlongRoute(routeCoordinates, progress / 100);
@@ -445,7 +443,7 @@ export const vessels = vesselTemplates.map((vessel, vesselIndex) => {
     ...vessel,
     status: 'В пути',
     speed: vessel.speed > 0 ? vessel.speed : 10.5,
-    route: isEastbound ? NSR_EASTBOUND_ROUTE_NAME : NSR_WESTBOUND_ROUTE_NAME,
+    route: nsrRoute.name,
     progress,
     position: coordinates,
     bearing,

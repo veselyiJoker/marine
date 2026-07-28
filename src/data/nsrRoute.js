@@ -1,4 +1,4 @@
-export const NSR_ROUTE_COORDINATES = [
+const nsrRouteCoordinates = [
   [33.061, 68.9841],
   [33, 69.08],
   [32.95, 69.18],
@@ -55,10 +55,31 @@ export const AMBARCHIK_PEVEK_ROUTE_COORDINATES = [
   [170.1, 69.82],
 ];
 
-export const NSR_EASTBOUND_ROUTE_NAME = 'Мурманск → Провидения через СМП';
-export const NSR_WESTBOUND_ROUTE_NAME = 'Провидения → Мурманск через СМП';
-export const NSR_ORIGIN_PORT_ID = 'nsr-murmansk';
-export const NSR_DESTINATION_PORT_ID = 'nsr-provideniya';
+export const NSR_ROUTE = Object.freeze({
+  coordinates: nsrRouteCoordinates,
+  originPortId: 'nsr-murmansk',
+  destinationPortId: 'nsr-provideniya',
+  eastboundName: 'Мурманск → Провидения через СМП',
+  westboundName: 'Провидения → Мурманск через СМП',
+});
+
+export function nsrRouteForPorts(originPortId, destinationPortId) {
+  if (originPortId === NSR_ROUTE.originPortId && destinationPortId === NSR_ROUTE.destinationPortId) {
+    return {
+      name: NSR_ROUTE.eastboundName,
+      coordinates: NSR_ROUTE.coordinates,
+    };
+  }
+
+  if (originPortId === NSR_ROUTE.destinationPortId && destinationPortId === NSR_ROUTE.originPortId) {
+    return {
+      name: NSR_ROUTE.westboundName,
+      coordinates: [...NSR_ROUTE.coordinates].reverse(),
+    };
+  }
+
+  return null;
+}
 
 function unwrapCoordinates(coordinates) {
   return coordinates.reduce((route, [lng, lat]) => {

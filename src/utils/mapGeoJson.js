@@ -1,5 +1,5 @@
 import maplibregl from 'maplibre-gl';
-import { NSR_ROUTE_COORDINATES } from '../data/nsrRoute.js';
+import { NSR_ROUTE } from '../data/nsrRoute.js';
 
 export const mapStyle = {
   version: 8,
@@ -49,7 +49,7 @@ export function northernSeaRouteGeoJson() {
         properties: { name: 'Северный морской путь' },
         geometry: {
           type: 'LineString',
-          coordinates: unwrapRouteCoordinates(NSR_ROUTE_COORDINATES),
+          coordinates: unwrapRouteCoordinates(NSR_ROUTE.coordinates),
         },
       },
     ],
@@ -58,7 +58,7 @@ export function northernSeaRouteGeoJson() {
 
 export function boundsForNorthernSeaRoute() {
   const bounds = new maplibregl.LngLatBounds();
-  unwrapRouteCoordinates(NSR_ROUTE_COORDINATES).forEach((coordinates) => bounds.extend(coordinates));
+  unwrapRouteCoordinates(NSR_ROUTE.coordinates).forEach((coordinates) => bounds.extend(coordinates));
   return bounds;
 }
 
