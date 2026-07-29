@@ -28,8 +28,8 @@ export function Sidebar() {
       <div className="brand">
         <span className="brand-mark"><Anchor size={22} /></span>
         <div>
-          <strong>MarineOps</strong>
-          <small>Logistics Control</small>
+          <strong>Северная Логистика</strong>
+          <small>Логистический контроль</small>
         </div>
       </div>
 

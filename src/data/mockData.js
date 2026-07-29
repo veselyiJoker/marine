@@ -29,7 +29,7 @@ const portById = Object.fromEntries(northernSeaRoutePorts.map((port) => [port.id
 const vesselTemplates = [
   {
     id: 'v-001',
-    name: 'Арктический горизонт',
+    name: 'МЫС ШМИДТА',
     imo: 'IMO 9387421',
     status: 'В пути',
     flag: 'Russia',
@@ -62,7 +62,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-002',
-    name: 'Звезда Ямала',
+    name: 'МЫС ДЕЖНЁВА',
     imo: 'IMO 9145208',
     status: 'Погрузка',
     flag: 'Russia',
@@ -94,7 +94,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-003',
-    name: 'Полярный меридиан',
+    name: 'ПОЛАР КИНГ',
     imo: 'IMO 9274318',
     status: 'Задержано',
     flag: 'Russia',
@@ -124,7 +124,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-004',
-    name: 'Беринговы ворота',
+    name: 'МИХАИЛ БРИТНЕВ',
     imo: 'IMO 9472901',
     status: 'В пути',
     flag: 'Russia',
@@ -154,7 +154,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-005',
-    name: 'Карский снабженец',
+    name: 'АНДРЕЙ ОСИПОВ',
     imo: 'IMO 9368114',
     status: 'Разгрузка',
     flag: 'Russia',
@@ -184,7 +184,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-006',
-    name: 'Чукотский экспресс',
+    name: 'АРКТИКА-1',
     imo: 'IMO 9495087',
     status: 'В пути',
     flag: 'Russia',
@@ -218,7 +218,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-007',
-    name: 'Северный Енисей',
+    name: 'АРКТИКА-2',
     imo: 'IMO 9512046',
     status: 'В пути',
     flag: 'Russia',
@@ -251,7 +251,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-008',
-    name: 'Беломорский перевозчик',
+    name: '50 ЛЕТ ПОБЕДЫ',
     imo: 'IMO 9436729',
     status: 'Погрузка',
     flag: 'Russia',
@@ -285,7 +285,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-009',
-    name: 'Лаптевский мост',
+    name: 'СЕВМОРПУТЬ',
     imo: 'IMO 9583174',
     status: 'В пути',
     flag: 'Russia',
@@ -319,7 +319,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-010',
-    name: 'Восточная Аврора',
+    name: 'АРКТИКА',
     imo: 'IMO 9614806',
     status: 'Разгрузка',
     flag: 'Russia',
@@ -348,7 +348,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-011',
-    name: 'Экспресс Обской губы',
+    name: 'СИБИРЬ',
     imo: 'IMO 9657024',
     status: 'В пути',
     flag: 'Russia',
@@ -375,7 +375,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-012',
-    name: 'Колымский лёд',
+    name: 'УРАЛ',
     imo: 'IMO 9671148',
     status: 'Ожидает отправки',
     flag: 'Russia',
@@ -402,7 +402,7 @@ const vesselTemplates = [
   },
   {
     id: 'v-013',
-    name: 'Амбарчикский челнок',
+    name: 'ЯКУТИЯ',
     imo: 'IMO 9713057',
     status: 'В пути',
     flag: 'Russia',
